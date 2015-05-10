@@ -35,9 +35,11 @@ main:
 	syscall
 	
 	# Lê número digitado pelo usuário como string
-	li	$v0, 12
+	li $v0,8 			# take in input
+	la $a0, $gt 		# load byte space into address
+	li $a1, 20 			# allot the byte space for string
+	move $s2, $a0 		# armazena a string em s2
 	syscall
-	move	$s2, $v0			# armazena a string em s2
 	
 	# Print ("O numero deve ser convertido para qual base? (B)Binario (O)Octal (D)Decimal (H)Hexadecimal")
 	li	$v0, 4
@@ -186,31 +188,77 @@ HexToDec:
 # TODO
 funcao_DecToBin:
 
-	li $t0, 
+	li $a0, 2
+	jal funcao_DecToAny
 
 	jr	$ra
 
 # TODO
 funcao_DecToOct:
 
-	
+	li $a0, 8
+	jal funcao_DecToAny
 
 	jr	$ra
+
 
 # TODO
 funcao_DecToHex:
 
+	li $a0, 16
+	jal funcao_DecToAny
+
 	jr	$ra
+
+#-----------------------------------------------------------------------#
+#	Converte decimal para qualquer número 								#
+#	Entrada $a0 = tipo da base destino									#
+#	Retorna $v0 = numero em binario										#
+#-----------------------------------------------------------------------#
+
+funcao_DecToAny:
+	li $t0, 32			# Run all 32 bits of our number width = z
+	move $t1, $s1		# Move our number to our temporary register
+	li $t5, 0			# Define our return as zero for now
+	jal funcao_DecToAny_loop
+
+funcao_DecToAny_loop:
+	move $a0, $a0		# Define our base to be exponentiated
+	move $a1, $t0		# Move our main argument to our exponential function
+	jal exponential
+	move $t2, $t5		# Move our result to our temporary register
+	sub $t3, $t1, $t2	# Get the result from y - (base ^ (z))
+
+	bge $t3, $zero, funcao_DecToAny_gotRight
+
+	subi $t0, $t0, 1   	# Reduce our base until we got zero
+
+	beq $t0, $zero, funcao_DecToAny_end
+
+funcao_DecToAny_gotRight:
+	li $a0, 10		# Define our base to be exponentiated
+	move $a1, $t0		# Move our main argument to our exponential function
+	jal exponential
+
+	add	$t5, $t5, $v0	# Sum our base to the temporary return register
+
+funcao_DecToAny_end:
+	move $v0, $t5
+
+	jr	$ra
+
+# -------------------------
+
 
 # TODO
 funcao_BinToDec:
-
-	# 
 
 	jr	$ra
 
 # TODO
 funcao_OctToDec:
+
+	# 
 
 	jr	$ra
 
@@ -255,7 +303,30 @@ verificaBaseConfirma:
 	
 verificaBaseFim:
 	jr	$ra
-	
+
+#-----------------------------------------------------------------------#
+#	Realiza a exponeciacao do numero										#
+#	Entrada $a0 = base; $a1 = expoente 									#
+#	Retorna $v0 = 1, se tudo estiver ok									#
+#-----------------------------------------------------------------------#
+exponential:
+	addi $sp, $sp, -4
+	sw $t0, 4($sp)
+	move $t0, $zero
+	li $v0, 1
+exponential_loop: 
+	beq	$t0, $a1, exponential_end	# Checks to see if $t0 is equal to $a1 if not
+						# it continues, if it is it jumps to end
+	mul	$v0, $v0, $a0	# Multiplies the value in $a0 by the value in $v0
+	addi $t0, $t0, 1	# Adds 1 to $t0 and stores it in $t0 because
+						# $t0 is the loop counter
+	j exponential_loop	# Jumps to the beginning of the loop to start
+						# the process over
+exponential_end:
+	#restore $t0 and the stack
+	lw	$t0, 4($sp)
+	addi $sp, $sp, 4
+	jr $ra
 	
 	
 

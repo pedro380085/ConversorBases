@@ -175,28 +175,39 @@ HexToDec:
 
 #****************************************** Funções de Conversão ******************************************#
 
-	# TODO
+#-----------------------------------------------------------------------------------#
+#	Converte qualquer número para binário e em seguida para a base desejada			#
+#	Retorna $v0 = número, na base desejada (como definida no nome da funcao)		#
+#-----------------------------------------------------------------------------------#
 
+# TODO
 funcao_BinToOct:
 
+
+
 	jr	$ra
-	
+
+# TODO
 funcao_BinToDec:
 
 	jr	$ra
-	
+
+# TODO
 funcao_BinToHex:
 
 	jr	$ra
 
+# TODO
 funcao_OctToBin:
 
 	jr	$ra
 
+# TODO
 funcao_DecToBin:
 
 	jr	$ra
-	
+
+# TODO	
 funcao_HexToBin:
 
 	jr	$ra
@@ -204,8 +215,8 @@ funcao_HexToBin:
 #****************************************** Funções Auxiliares ******************************************#
 
 #-----------------------------------------------------------------------#
-#	Verifica se a base passada por parametro é B, O, D ou H		#
-#	Retorna $v0 = 1, se tudo estiver ok				#
+#	Verifica se a base passada por parametro é B, O, D ou H				#
+#	Retorna $v0 = 1, se tudo estiver ok									#
 #-----------------------------------------------------------------------#
 verificaBase:
 	# Empilha registradores da função

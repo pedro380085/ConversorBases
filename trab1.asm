@@ -121,94 +121,99 @@ encerraPrograma:
 #------------- Definição de fluxo do programa -------------#
 # Binario
 BinToOct:
-	jal	funcao_BinToOct
+	jal	funcao_BinToDec
+	move	$a0, $v0
+	jal	funcao_DecToOct
 	j	imprimeResultado
 BinToDec:
 	jal	funcao_BinToDec
 	j	imprimeResultado
 BinToHex:
-	jal	funcao_BinToHex
+	jal	funcao_BinToDec
+	move	$a0, $v0
+	jal	funcao_DecToHex
 	j	imprimeResultado
+
 # Octal
 OctToBin:
-	jal	funcao_OctToBin
+	jal	funcao_OctToDec
+	move	$a0, $v0
+	jal	funcao_DecToBin
 	j	imprimeResultado
 OctToDec:
-	jal	funcao_OctToBin
-	move	$a0, $v0
-	jal	funcao_BinToDec
+	jal	funcao_OctToDec
 	j	imprimeResultado
 OctToHex:
-	jal	funcao_OctToBin
+	jal	funcao_OctToDec
 	move	$a0, $v0
-	jal	funcao_BinToHex
+	jal	funcao_DecToHex
 	j	imprimeResultado
+
 # Decimal	
 DecToBin:
 	jal	funcao_DecToBin
 	j	imprimeResultado
 DecToOct:
-	jal	funcao_DecToBin
-	move	$a0, $v0
-	jal	funcao_BinToOct
+	jal	funcao_DecToOct
 	j	imprimeResultado
 DecToHex:
-	jal	funcao_DecToBin
-	move	$a0, $v0
-	jal	funcao_BinToHex
+	jal	funcao_DecToHex
 	j	imprimeResultado
+
 # Hexadecimal
 HexToBin:
-	jal	funcao_HexToBin
+	jal	funcao_HexToDec
+	move	$a0, $v0
+	jal	funcao_DecToBin
 	j	imprimeResultado
 HexToOct:
-	jal	funcao_HexToBin
+	jal	funcao_HexToDec
 	move	$a0, $v0
-	jal	funcao_BinToOct
+	jal	funcao_DecToOct
 	j	imprimeResultado
 HexToDec:
-	jal	funcao_HexToBin
-	move	$a0, $v0
-	jal	funcao_BinToDec
+	jal	funcao_HexToDec
 	j	imprimeResultado
 
 
 #****************************************** Funções de Conversão ******************************************#
 
 #-----------------------------------------------------------------------------------#
-#	Converte qualquer número para binário e em seguida para a base desejada			#
+#	Converte qualquer número para decimal e em seguida para a base desejada			#
 #	Retorna $v0 = número, na base desejada (como definida no nome da funcao)		#
 #-----------------------------------------------------------------------------------#
-
-# TODO
-funcao_BinToOct:
-
-
-
-	jr	$ra
-
-# TODO
-funcao_BinToDec:
-
-	jr	$ra
-
-# TODO
-funcao_BinToHex:
-
-	jr	$ra
-
-# TODO
-funcao_OctToBin:
-
-	jr	$ra
 
 # TODO
 funcao_DecToBin:
 
 	jr	$ra
 
+# TODO
+funcao_DecToOct:
+
+	
+
+	jr	$ra
+
+# TODO
+funcao_DecToHex:
+
+	jr	$ra
+
+# TODO
+funcao_BinToDec:
+
+	# 
+
+	jr	$ra
+
+# TODO
+funcao_OctToDec:
+
+	jr	$ra
+
 # TODO	
-funcao_HexToBin:
+funcao_HexToDec:
 
 	jr	$ra
 	

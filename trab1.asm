@@ -5,6 +5,7 @@
 	STR_INSIRA_NUMERO: .asciiz "\nInsira numero a ser convertido:\n"
 	STR_INSIRA_BASE_FINAL: .asciiz "O numero deve ser convertido para qual base? (B)Binario (O)Octal (D)Decimal (H)Hexadecimal\n"
 	STR_ENTRADA_INVALIDA: .asciiz "\nEntrada Invalida"
+	STR_INPUT: .space 64
 	
 .text
 	.globl main
@@ -21,22 +22,22 @@ main:
 	la	$a0, STR_INSIRA_BASE_INICIAL
 	syscall
 	
-	# Lê a base do número inicial
+	# Le a base do numero inicial
 	li	$v0, 12
 	syscall
 	move	$a0, $v0			# insere valor lido como parametro da funcao
 	move	$s0, $v0			# armazena o valor de base inicial em s0
 	jal 	verificaBase
-	beq	$v0, $zero, encerraPrograma	# se a função retornou 0, a entrada foi inválida
+	beq	$v0, $zero, encerraPrograma	# se a funCAOo retornou 0, a entrada foi invAlida
 			
 	# Print ("Insira numero a ser convertido:")
 	li	$v0, 4
 	la	$a0, STR_INSIRA_NUMERO
 	syscall
 	
-	# Lê número digitado pelo usuário como string
-	li $v0,8 			# take in input
-	la $a0, $gt 		# load byte space into address
+	# Le numero digitado pelo usuario como string
+	li $v0, 8 			# take in input
+	la $a0, STR_INPUT 	# load byte space into address
 	li $a1, 20 			# allot the byte space for string
 	move $s2, $a0 		# armazena a string em s2
 	syscall
@@ -46,21 +47,21 @@ main:
 	la	$a0, STR_INSIRA_BASE_FINAL
 	syscall
 	
-	# Lê a base do resultado final
+	# Le a base do resultado final
 	li	$v0, 12
 	syscall
 	move	$a0, $v0			# insere valor lido como parametro da funcao
 	move	$s1, $v0			# armazena o valor de base final em s1
 	jal 	verificaBase
-	beq	$v0, $zero, encerraPrograma	# se a função retornou 0, a entrada foi inválida
+	beq	$v0, $zero, encerraPrograma	# se a funcao retornou 0, a entrada foi invalida
 	
 	
-	# Verifica qual será a conversão 
+	# Verifica qual sera a conversao 
 	#	$s0 -> base inicial
 	#	$s1 -> base final
 	#	$s2 -> numero
 	
-	move 	$a0, $s2	# já define o numero como parametro da função de conversão
+	move 	$a0, $s2	# define o numero como parametro da funcao de conversao
 	
 	li	$t0, 'B'
 	bne	$s0, $t0, baseInicialNaoEhBinaria
@@ -120,7 +121,7 @@ encerraPrograma:
 	li	$v0, 10
 	syscall
 	
-#------------- Definição de fluxo do programa -------------#
+#------------- Definiï¿½ï¿½o de fluxo do programa -------------#
 # Binario
 BinToOct:
 	jal	funcao_BinToDec
@@ -178,11 +179,11 @@ HexToDec:
 	j	imprimeResultado
 
 
-#****************************************** Funções de Conversão ******************************************#
+#****************************************** Funï¿½ï¿½es de Conversï¿½o ******************************************#
 
 #-----------------------------------------------------------------------------------#
-#	Converte qualquer número para decimal e em seguida para a base desejada			#
-#	Retorna $v0 = número, na base desejada (como definida no nome da funcao)		#
+#	Converte qualquer numero para decimal e em seguida para a base desejada			#
+#	Retorna $v0 = numero, na base desejada (como definida no nome da funcao)		#
 #-----------------------------------------------------------------------------------#
 
 # TODO
@@ -211,7 +212,7 @@ funcao_DecToHex:
 	jr	$ra
 
 #-----------------------------------------------------------------------#
-#	Converte decimal para qualquer número 								#
+#	Converte decimal para qualquer numero 								#
 #	Entrada $a0 = tipo da base destino									#
 #	Retorna $v0 = numero em binario										#
 #-----------------------------------------------------------------------#
@@ -267,14 +268,14 @@ funcao_HexToDec:
 
 	jr	$ra
 	
-#****************************************** Funções Auxiliares ******************************************#
+#****************************************** Funï¿½ï¿½es Auxiliares ******************************************#
 
 #-----------------------------------------------------------------------#
-#	Verifica se a base passada por parametro é B, O, D ou H				#
+#	Verifica se a base passada por parametro ï¿½ B, O, D ou H				#
 #	Retorna $v0 = 1, se tudo estiver ok									#
 #-----------------------------------------------------------------------#
 verificaBase:
-	# Empilha registradores da função
+	# Empilha registradores da funcao
 	
 	li	$v0, 0		# inicia retorno como falso
 	
@@ -290,7 +291,7 @@ verificaBase:
 	li	$t0, 'H'	# compara com H
 	beq	$t0, $a0, verificaBaseConfirma
 	
-	# Se chegou até aqui é porque a entrada foi invalida
+	# Se chegou atï¿½ aqui ï¿½ porque a entrada foi invalida
 	# Print ("Conversor de Bases")
 	li	$v0, 4
 	la	$a0, STR_ENTRADA_INVALIDA

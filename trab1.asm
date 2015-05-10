@@ -34,10 +34,10 @@ main:
 	la	$a0, STR_INSIRA_NUMERO
 	syscall
 	
-	# Lê número digitado pelo usuário
-	li	$v0, 5
+	# Lê número digitado pelo usuário como string
+	li	$v0, 12
 	syscall
-	move	$s2, $v0			# armazena o numero em s2
+	move	$s2, $v0			# armazena a string em s2
 	
 	# Print ("O numero deve ser convertido para qual base? (B)Binario (O)Octal (D)Decimal (H)Hexadecimal")
 	li	$v0, 4
@@ -185,6 +185,8 @@ HexToDec:
 
 # TODO
 funcao_DecToBin:
+
+	li $t0, 
 
 	jr	$ra
 

@@ -179,7 +179,7 @@ HexToDec:
 	j	imprimeResultado
 
 
-#****************************************** Fun��es de Convers�o ******************************************#
+#****************************************** Funcoes de Convers�o ******************************************#
 
 #-----------------------------------------------------------------------------------#
 #	Converte qualquer numero para decimal e em seguida para a base desejada			#
@@ -227,7 +227,7 @@ funcao_DecToAny:
 	addi $sp, $sp, -4
 	sw $ra, 4($sp)
 
-	li $t0, 24			# Run all 16 bits of our number width = z
+	li $t0, 31			# Run all 32 bits of our number width = z
 	move $t1, $s2		# Move our number to our temporary register
 	li $t5, 0			# Define our return as zero for now
 	move $t6, $a0		# Move our exponent base to a safe place
@@ -264,9 +264,6 @@ funcao_DecToAny_end:
 
 	jr	$ra
 
-# -------------------------
-
-
 # TODO
 funcao_BinToDec:
 
@@ -282,9 +279,125 @@ funcao_OctToDec:
 # TODO	
 funcao_HexToDec:
 
+	li $a0, 16
+
+	move $t7, $ra
+	jal funcao_AnyToDec
+	move $ra, $t7
+
+	jr	$ra
+
+#-----------------------------------------------------------------------#
+#	Converte qualquer numero para decimal								#
+#	Entrada $a0 = tipo da base origem									#
+#	Retorna $v0 = numero em decimal										#
+#-----------------------------------------------------------------------#
+
+funcao_AnyToDec:
+	# Save our return pointer
+	addi $sp, $sp, -4
+	sw $ra, 4($sp)
+
+	# Save our base size
+	move $t6, $a0
+
+	# Get string length
+	move $a0, $2
+	jal strlen
+	move $t3, $v0
+
+	# Inicia o retorno
+	move $t4, $s2
+	li $t5, 0
+
+funcao_AnyToDec_loop:
+	lb $t2, 0($t4)   				# load the next character to t2
+	bnez $t2, funcao_AnyToDec_end 	# end loop if null character is reached
+
+	li $t0, '0'
+	li $t1, 0
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, '1'
+	li $t1, 1
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, '2'
+	li $t1, 2
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, '3'
+	li $t1, 3
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, '4'
+	li $t1, 4
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, '5'
+	li $t1, 5
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, '6'
+	li $t1, 6
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, '7'
+	li $t1, 7
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, '8'
+	li $t1, 8
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, '9'
+	li $t1, 9
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, 'A'
+	li $t1, 10
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, 'B'
+	li $t1, 11
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, 'C'
+	li $t1, 12
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, 'D'
+	li $t1, 13
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, 'E'
+	li $t1, 14
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+	li $t0, 'F'
+	li $t1, 15
+	beq $t0, $a0, funcao_AnyToDec_continue
+
+funcao_AnyToDec_continue:
+	li $a0, $t6			# Define our base to be exponentiated
+	move $a1, $t3		# Move our main argument to our exponential function
+	jal exponential
+
+	mul $t1, $t1, $v0 	# Multiplica as bases
+	subi $t3, $t3, 1 	# Decrementa o tamanho da string
+	add $t5, $t5, $t1 	# Soma o resultado a base
+	addi $t4, $t4, 1 	# Aumenta a posicao do nosso registrador de caracter
+
+funcao_AnyToDec_end:
+	move $v0, $t5		# Move to our end pointer
+
+	# Restore our return pointer
+	lw	$ra, 4($sp)
+	addi $sp, $sp, 4
+
 	jr	$ra
 	
-#****************************************** Fun��es Auxiliares ******************************************#
+#****************************************** Funcoes Auxiliares ******************************************#
 
 #-----------------------------------------------------------------------#
 #	Verifica se a base passada por parametro � B, O, D ou H				#
@@ -346,14 +459,23 @@ exponential_end:
 	jr $ra
 	
 	
-
-
-
-
-
-
-
-
+#-----------------------------------------------------------------------#
+#	Realiza o calculo do tamanho da string								#
+#	Entrada $a0 = base; $a1 = expoente 									#
+#	Retorna $v0 = tamanho da string 									#
+#-----------------------------------------------------------------------#
+## int strlen(char*)
+strlen:
+    addi $t0, $zero, 1  #initialize count to start with 1 for first character
+    j strlen.test
+strlen.loop:
+    addi $a0, $a0, 1    #load increment string pointer
+    addi $t0, $t0, 1 	#increment count
+strlen.test:
+    lb $t1, 0($a0)   	#load the next character to t0
+    bnez $t1, strlen.loop #end loop if null character is reached
+    move $v0, $t0
+    jr $ra
 
 
 

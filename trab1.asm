@@ -179,18 +179,16 @@ HexToDec:
 	j	imprimeResultado
 
 
-#****************************************** Funcoes de Convers�o ******************************************#
+#****************************************** Funcoes de Conversao ******************************************#
 
 #-----------------------------------------------------------------------------------#
 #	Converte qualquer numero para decimal e em seguida para a base desejada			#
 #	Retorna $v0 = numero, na base desejada (como definida no nome da funcao)		#
 #-----------------------------------------------------------------------------------#
 
-# TODO
 funcao_DecToBin:
 
 	li $a0, 2
-	li $s2, 1000
 
 	move $t7, $ra
 	jal funcao_DecToAny
@@ -198,21 +196,54 @@ funcao_DecToBin:
 
 	jr	$ra
 
-# TODO
 funcao_DecToOct:
 
 	li $a0, 8
+
+	move $t7, $ra
 	jal funcao_DecToAny
+	move $ra, $t7
 
 	jr	$ra
 
 
-# TODO
 funcao_DecToHex:
 
 	li $a0, 16
 
+	move $t7, $ra
 	jal funcao_DecToAny
+	move $ra, $t7
+
+	jr	$ra
+
+funcao_BinToDec:
+
+	li $a0, 2
+
+	move $t7, $ra
+	jal funcao_AnyToDec
+	move $ra, $t7
+
+	jr	$ra
+
+funcao_OctToDec:
+
+	li $a0, 8
+
+	move $t7, $ra
+	jal funcao_AnyToDec
+	move $ra, $t7
+
+	jr	$ra
+	
+funcao_HexToDec:
+
+	li $a0, 16
+
+	move $t7, $ra
+	jal funcao_AnyToDec
+	move $ra, $t7
 
 	jr	$ra
 
@@ -261,29 +292,6 @@ funcao_DecToAny_end:
 	# Restore our return pointer
 	lw	$ra, 4($sp)
 	addi $sp, $sp, 4
-
-	jr	$ra
-
-# TODO
-funcao_BinToDec:
-
-	jr	$ra
-
-# TODO
-funcao_OctToDec:
-
-	# 
-
-	jr	$ra
-
-# TODO	
-funcao_HexToDec:
-
-	li $a0, 16
-
-	move $t7, $ra
-	jal funcao_AnyToDec
-	move $ra, $t7
 
 	jr	$ra
 

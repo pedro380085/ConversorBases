@@ -161,8 +161,8 @@ OctToDec:
 OctToHex:
 	li $a0, 8
 	jal funcao_stringToNumber
-	li $a0, 16
-	jal	funcao_numberToString
+	#li $a0, 16
+	#jal	funcao_numberToString
 	j	imprimeResultado
 
 # Decimal	
@@ -201,8 +201,8 @@ HexToOct:
 HexToDec:
 	li $a0, 16
 	jal funcao_stringToNumber
-	#li $a0, 10
-	#jal	funcao_numberToString
+	li $a0, 10
+	jal	funcao_numberToString
 	j	imprimeResultado
 
 
@@ -223,24 +223,100 @@ funcao_numberToString:
 	move $t1, $s2		# Move our number to our temporary register
 	li $t5, 0			# Define our return as zero for now
 	move $t6, $a0		# Move our exponent base to a safe place
-	jal funcao_numberToString_loop
+	li $t7, 0 			# Reset our inner loop register
 
 funcao_numberToString_loop:
+	move $t7, $t6 		# Define our inner loop register
+	subi $t7, $t7, 1 	# Decrement to address pointer default logic (start at zero)
+
+funcao_numberToString_innerLoop:
 	move $a0, $t6		# Define our base to be exponentiated
 	move $a1, $t0		# Move our main argument to our exponential function
 	jal exponential
 	move $t2, $v0		# Move our result to our temporary register
-	sub $t3, $t1, $t2	# Get the result from y - (base ^ (z))
+	mul $t2, $t2, $t7 	# w = (base - alpha) * (base ^ (z))
+	sub $t3, $t1, $t2	# Get the result from (y - w)
 
-	blt $t3, $zero, funcao_numberToString_continue
+	blt $t3, $zero, funcao_numberToString_innerContinue
 
 	move $t1, $t3		# Reduce our number for the next interaction
 
-	li $a0, 10			# Define our base to be exponentiated
-	move $a1, $t0		# Move our main argument to our exponential function
-	jal exponential
+	# Concatenate strings
+	move $a0, $s2		# Our origin string
 
-	add	$t5, $t5, $v0	# Sum our base to the temporary return register
+	li $a1, '0'
+	li $t0, 0
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, '1'
+	li $t0, 1
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, '2'
+	li $t0, 2
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, '3'
+	li $t0, 3
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, '4'
+	li $t0, 4
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, '5'
+	li $t0, 5
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, '6'
+	li $t0, 6
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, '7'
+	li $t0, 7
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, '8'
+	li $t0, 8
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, '9'
+	li $t0, 9
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, 'A'
+	li $t0, 10
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, 'B'
+	li $t0, 11
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, 'C'
+	li $t0, 12
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, 'D'
+	li $t0, 13
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, 'E'
+	li $t0, 14
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+	li $a1, 'F'
+	li $t0, 15
+	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+
+funcao_numberToString_innerLoopConcatenate:
+	jal strcopier
+
+	j funcao_numberToString_continue
+
+funcao_numberToString_innerContinue:
+	subi $t7, $t7, 1 	# Reduce (base - alpha) until we get to zero
+
+	bne $t0, $zero, funcao_numberToString_innerLoop
 
 funcao_numberToString_continue:
 	subi $t0, $t0, 1   	# Reduce our base until we got zero
@@ -454,8 +530,12 @@ strlen.test:
 	addi $sp, $sp, 4
     jr $ra
 
-
-
+#-----------------------------------------------------------------------#
+#	Copia uma string em outra											#
+#	Entrada $a0 = endereco da primeira string 							#
+#	Entrada $a1 = endereco da segunda string 							#
+#	Retorna $v0 = endereco da string 									#
+#-----------------------------------------------------------------------#
 # String copier function
 strcopier:
 	addi $sp, $sp, -12

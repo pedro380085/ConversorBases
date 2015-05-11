@@ -2,9 +2,10 @@
 	.align 0
 	STR_TITULO: .asciiz "Conversor de Bases\n\n"
 	STR_INSIRA_BASE_INICIAL: .asciiz "Qual eh a base do numero a ser inserido? (B)Binario (O)Octal (D)Decimal (H)Hexadecimal\n"
-	STR_INSIRA_NUMERO: .asciiz "\nInsira numero a ser convertido:\n"
+	STR_INSIRA_NUMERO: .asciiz "Insira numero a ser convertido:\n"
 	STR_INSIRA_BASE_FINAL: .asciiz "O numero deve ser convertido para qual base? (B)Binario (O)Octal (D)Decimal (H)Hexadecimal\n"
 	STR_ENTRADA_INVALIDA: .asciiz "\nEntrada Invalida"
+	STR_NOVA_LINHA: .asciiz "\n"
 	STR_INPUT: .space 64
 	STR_OUTPUT: .space 64
 	
@@ -30,7 +31,11 @@ main:
 	move	$s0, $v0			# armazena o valor de base inicial em s0
 	jal 	verificaBase
 	beq	$v0, $zero, encerraPrograma	# se a funcao retornou 0, a entrada foi invAlida
-			
+
+	li	$v0, 4
+	la	$a0, STR_NOVA_LINHA
+	syscall
+
 	# Print ("Insira numero a ser convertido:")
 	li	$v0, 4
 	la	$a0, STR_INSIRA_NUMERO
@@ -55,6 +60,10 @@ main:
 	move	$s1, $v0			# armazena o valor de base final em s1
 	jal 	verificaBase
 	beq	$v0, $zero, encerraPrograma	# se a funcao retornou 0, a entrada foi invalida
+
+	li	$v0, 4
+	la	$a0, STR_NOVA_LINHA
+	syscall
 
 	# Carrega a posicao final
 	la	$s3, STR_OUTPUT
@@ -130,21 +139,18 @@ encerraPrograma:
 BinToOct:
 	li $a0, 2
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 8
 	jal	funcao_numberToString
 	j	imprimeResultado
 BinToDec:
 	li $a0, 2
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 10
 	jal	funcao_numberToString
 	j	imprimeResultado
 BinToHex:
 	li $a0, 2
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 16
 	jal	funcao_numberToString
 	j	imprimeResultado
@@ -153,21 +159,18 @@ BinToHex:
 OctToBin:
 	li $a0, 8
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 2
 	jal	funcao_numberToString
 	j	imprimeResultado
 OctToDec:
 	li $a0, 8
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 10
 	jal	funcao_numberToString
 	j	imprimeResultado
 OctToHex:
 	li $a0, 8
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 16
 	jal	funcao_numberToString
 	j	imprimeResultado
@@ -176,21 +179,18 @@ OctToHex:
 DecToBin:
 	li $a0, 10
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 2
 	jal	funcao_numberToString
 	j	imprimeResultado
 DecToOct:
 	li $a0, 10
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 8
 	jal	funcao_numberToString
 	j	imprimeResultado
 DecToHex:
 	li $a0, 10
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 16
 	jal	funcao_numberToString
 	j	imprimeResultado
@@ -199,21 +199,18 @@ DecToHex:
 HexToBin:
 	li $a0, 16
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 2
 	jal	funcao_numberToString
 	j	imprimeResultado
 HexToOct:
 	li $a0, 16
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 8
 	jal	funcao_numberToString
 	j	imprimeResultado
 HexToDec:
 	li $a0, 16
 	jal funcao_stringToNumber
-	move $s2, $v0
 	li $a0, 10
 	jal	funcao_numberToString
 	j	imprimeResultado
@@ -232,7 +229,24 @@ funcao_numberToString:
 	addi $sp, $sp, -4
 	sw $ra, 4($sp)
 
-	li $t0, 24			# Run all 32 bits of our number width = z
+	# Run all 32 bits of our number width = z
+	li $t0, 31
+	li $t7, 2
+	beq $a0, $t7, funcao_numberToString_init
+
+	li $t0, 10
+	li $t7, 8
+	beq $a0, $t7, funcao_numberToString_init
+
+	li $t0, 8
+	li $t7, 10
+	beq $a0, $t7, funcao_numberToString_init
+
+	li $t0, 7
+	li $t7, 16
+	beq $a0, $t7, funcao_numberToString_init
+
+funcao_numberToString_init:
 	move $t1, $s2		# Move our number to our temporary register
 	li $t5, 0			# Define our return as zero for now
 	move $t6, $a0		# Move our exponent base to a safe place
@@ -256,8 +270,6 @@ funcao_numberToString_innerLoop:
 	move $t1, $t3		# Reduce our number for the next interaction
 
 	# Concatenate strings
-	move $a0, $s3		# Our origin string
-
 	li $a1, '0'
 	li $t4, 0
 	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
@@ -323,23 +335,26 @@ funcao_numberToString_innerLoop:
 	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 funcao_numberToString_innerLoopConcatenate:
-	jal strcopier
+	# move $a0, $s3		# Our origin string
+	#jal strcopier
+
+	li $v0, 11
+	move $a0, $a1
+	syscall
 
 	j funcao_numberToString_continue
 
 funcao_numberToString_innerContinue:
 	subi $t7, $t7, 1 	# Reduce (base - alpha) until we get to zero
 
-	bne $t0, $zero, funcao_numberToString_innerLoop
+	bgt $t7, $zero, funcao_numberToString_innerLoop
 
 funcao_numberToString_continue:
 	subi $t0, $t0, 1   	# Reduce our base until we got zero
 
-	bne $t0, $zero, funcao_numberToString_loop
+	bge $t0, $zero, funcao_numberToString_loop
 
 funcao_numberToString_end:
-	move $v0, $t5		# Move to our end pointer
-
 	# Restore our return pointer
 	lw	$ra, 4($sp)
 	addi $sp, $sp, 4
@@ -451,7 +466,7 @@ funcao_stringToNumber_continue:
 	bne $t3, $zero, funcao_stringToNumber_loop
 
 funcao_stringToNumber_end:
-	move $v0, $t5		# Move to our end pointer
+	move $s2, $t5		# Move to our end pointer
 
 	# Restore our return pointer
 	lw	$ra, 4($sp)

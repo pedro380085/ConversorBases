@@ -234,7 +234,7 @@ funcao_numberToString:
 	li $t7, 2
 	beq $a0, $t7, funcao_numberToString_init
 
-	li $t0, 10
+	li $t0, 9
 	li $t7, 8
 	beq $a0, $t7, funcao_numberToString_init
 

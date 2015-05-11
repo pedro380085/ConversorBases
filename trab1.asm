@@ -127,136 +127,94 @@ encerraPrograma:
 #------------- Definicao de fluxo do programa -------------#
 # Binario
 BinToOct:
-	jal	funcao_BinToDec
-	move	$a0, $v0
-	jal	funcao_DecToOct
+	li $a0, 2
+	jal funcao_stringToNumber
+	li $a0, 8
+	jal	funcao_numberToString
 	j	imprimeResultado
 BinToDec:
-	jal	funcao_BinToDec
+	li $a0, 2
+	jal funcao_stringToNumber
+	li $a0, 10
+	jal	funcao_numberToString
 	j	imprimeResultado
 BinToHex:
-	jal	funcao_BinToDec
-	move	$a0, $v0
-	jal	funcao_DecToHex
+	li $a0, 2
+	jal funcao_stringToNumber
+	li $a0, 16
+	jal	funcao_numberToString
 	j	imprimeResultado
 
 # Octal
 OctToBin:
-	jal	funcao_OctToDec
-	move	$a0, $v0
-	jal	funcao_DecToBin
+	li $a0, 8
+	jal funcao_stringToNumber
+	li $a0, 2
+	jal	funcao_numberToString
 	j	imprimeResultado
 OctToDec:
-	jal	funcao_OctToDec
+	li $a0, 8
+	jal funcao_stringToNumber
+	li $a0, 10
+	jal	funcao_numberToString
 	j	imprimeResultado
 OctToHex:
-	jal	funcao_OctToDec
-	move	$a0, $v0
-	jal	funcao_DecToHex
+	li $a0, 8
+	jal funcao_stringToNumber
+	li $a0, 16
+	jal	funcao_numberToString
 	j	imprimeResultado
 
 # Decimal	
 DecToBin:
-	jal	funcao_DecToBin
+	li $a0, 10
+	jal funcao_stringToNumber
+	li $a0, 2
+	jal	funcao_numberToString
 	j	imprimeResultado
 DecToOct:
-	jal	funcao_DecToOct
+	li $a0, 10
+	jal funcao_stringToNumber
+	li $a0, 8
+	jal	funcao_numberToString
 	j	imprimeResultado
 DecToHex:
-	jal	funcao_DecToHex
+	li $a0, 10
+	jal funcao_stringToNumber
+	li $a0, 16
+	jal	funcao_numberToString
 	j	imprimeResultado
 
 # Hexadecimal
 HexToBin:
-	jal	funcao_HexToDec
-	move	$a0, $v0
-	jal	funcao_DecToBin
+	li $a0, 16
+	jal funcao_stringToNumber
+	li $a0, 2
+	jal	funcao_numberToString
 	j	imprimeResultado
 HexToOct:
-	jal	funcao_HexToDec
-	move	$a0, $v0
-	jal	funcao_DecToOct
+	li $a0, 16
+	jal funcao_stringToNumber
+	li $a0, 8
+	jal	funcao_numberToString
 	j	imprimeResultado
 HexToDec:
-	jal	funcao_HexToDec
+	li $a0, 16
+	jal funcao_stringToNumber
+	#li $a0, 10
+	#jal	funcao_numberToString
 	j	imprimeResultado
 
 
 #****************************************** Funcoes de Conversao ******************************************#
 
-#-----------------------------------------------------------------------------------#
-#	Converte qualquer numero para decimal e em seguida para a base desejada			#
-#	Retorna $v0 = numero, na base desejada (como definida no nome da funcao)		#
-#-----------------------------------------------------------------------------------#
-
-funcao_DecToBin:
-
-	li $a0, 2
-
-	move $t7, $ra
-	jal funcao_DecToAny
-	move $ra, $t7
-
-	jr	$ra
-
-funcao_DecToOct:
-
-	li $a0, 8
-
-	move $t7, $ra
-	jal funcao_DecToAny
-	move $ra, $t7
-
-	jr	$ra
-
-
-funcao_DecToHex:
-
-	li $a0, 16
-
-	move $t7, $ra
-	jal funcao_DecToAny
-	move $ra, $t7
-
-	jr	$ra
-
-funcao_BinToDec:
-
-	li $a0, 2
-
-	move $t7, $ra
-	jal funcao_AnyToDec
-	move $ra, $t7
-
-	jr	$ra
-
-funcao_OctToDec:
-
-	li $a0, 8
-
-	move $t7, $ra
-	jal funcao_AnyToDec
-	move $ra, $t7
-
-	jr	$ra
-	
-funcao_HexToDec:
-
-	li $a0, 16
-
-	move $t7, $ra
-	jal funcao_AnyToDec
-	move $ra, $t7
-
-	jr	$ra
-
 #-----------------------------------------------------------------------#
-#	Converte decimal para qualquer numero 								#
+#	Converte numero para string 										#
 #	Entrada $a0 = tipo da base destino									#
-#	Retorna $v0 = numero em binario										#
+#	Grava $s2 = numero													#
 #-----------------------------------------------------------------------#
 
-funcao_DecToAny:
+funcao_numberToString:
 	# Save our return pointer
 	addi $sp, $sp, -4
 	sw $ra, 4($sp)
@@ -265,16 +223,16 @@ funcao_DecToAny:
 	move $t1, $s2		# Move our number to our temporary register
 	li $t5, 0			# Define our return as zero for now
 	move $t6, $a0		# Move our exponent base to a safe place
-	jal funcao_DecToAny_loop
+	jal funcao_numberToString_loop
 
-funcao_DecToAny_loop:
+funcao_numberToString_loop:
 	move $a0, $t6		# Define our base to be exponentiated
 	move $a1, $t0		# Move our main argument to our exponential function
 	jal exponential
 	move $t2, $v0		# Move our result to our temporary register
 	sub $t3, $t1, $t2	# Get the result from y - (base ^ (z))
 
-	blt $t3, $zero, funcao_DecToAny_continue
+	blt $t3, $zero, funcao_numberToString_continue
 
 	move $t1, $t3		# Reduce our number for the next interaction
 
@@ -284,13 +242,13 @@ funcao_DecToAny_loop:
 
 	add	$t5, $t5, $v0	# Sum our base to the temporary return register
 
-funcao_DecToAny_continue:
+funcao_numberToString_continue:
 	subi $t0, $t0, 1   	# Reduce our base until we got zero
 
-	bne $t0, $zero, funcao_DecToAny_loop
+	bne $t0, $zero, funcao_numberToString_loop
 
-funcao_DecToAny_end:
-	move $v0, $t5		# Move to our end pointer
+funcao_numberToString_end:
+	move $s2, $t5		# Move to our end pointer
 
 	# Restore our return pointer
 	lw	$ra, 4($sp)
@@ -299,12 +257,12 @@ funcao_DecToAny_end:
 	jr	$ra
 
 #-----------------------------------------------------------------------#
-#	Converte qualquer numero para decimal								#
+#	Converte qualquer string	 para numero								#
 #	Entrada $a0 = tipo da base origem									#
-#	Retorna $v0 = numero em decimal										#
+#	Retorna $s2 = string												#
 #-----------------------------------------------------------------------#
 
-funcao_AnyToDec:
+funcao_stringToNumber:
 	# Save our return pointer
 	addi $sp, $sp, -4
 	sw $ra, 4($sp)
@@ -321,75 +279,75 @@ funcao_AnyToDec:
 	move $t4, $s2
 	li $t5, 0
 
-funcao_AnyToDec_loop:
+funcao_stringToNumber_loop:
 	lb $t2, 0($t4)   						# load the next character to t2
-	beq $t2, $zero, funcao_AnyToDec_end 	# end loop if null character is reached
+	beq $t2, $zero, funcao_stringToNumber_end 	# end loop if null character is reached
 
 	li $t0, '0'
 	li $t1, 0
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, '1'
 	li $t1, 1
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, '2'
 	li $t1, 2
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, '3'
 	li $t1, 3
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, '4'
 	li $t1, 4
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, '5'
 	li $t1, 5
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, '6'
 	li $t1, 6
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, '7'
 	li $t1, 7
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, '8'
 	li $t1, 8
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, '9'
 	li $t1, 9
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, 'A'
 	li $t1, 10
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, 'B'
 	li $t1, 11
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, 'C'
 	li $t1, 12
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, 'D'
 	li $t1, 13
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, 'E'
 	li $t1, 14
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
 	li $t0, 'F'
 	li $t1, 15
-	beq $t0, $t2, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_stringToNumber_continue
 
-funcao_AnyToDec_continue:
+funcao_stringToNumber_continue:
 	move $a0, $t6		# Define our base to be exponentiated
 	move $a1, $t3		# Move our main argument to our exponential function
 	subi $a1, $a1, 1 	# Bases exponenciais comecam a contar em 0
@@ -400,10 +358,10 @@ funcao_AnyToDec_continue:
 	add $t5, $t5, $t1 	# Soma o resultado a base
 	addi $t4, $t4, 1 	# Aumenta a posicao do nosso registrador de caracter
 
-	bne $t3, $zero, funcao_AnyToDec_loop
+	bne $t3, $zero, funcao_stringToNumber_loop
 
-funcao_AnyToDec_end:
-	move $v0, $t5		# Move to our end pointer
+funcao_stringToNumber_end:
+	move $s2, $t5		# Move to our end pointer
 
 	# Restore our return pointer
 	lw	$ra, 4($sp)

@@ -28,7 +28,7 @@ main:
 	move	$a0, $v0			# insere valor lido como parametro da funcao
 	move	$s0, $v0			# armazena o valor de base inicial em s0
 	jal 	verificaBase
-	beq	$v0, $zero, encerraPrograma	# se a funCAOo retornou 0, a entrada foi invAlida
+	beq	$v0, $zero, encerraPrograma	# se a funcao retornou 0, a entrada foi invAlida
 			
 	# Print ("Insira numero a ser convertido:")
 	li	$v0, 4
@@ -190,7 +190,11 @@ HexToDec:
 funcao_DecToBin:
 
 	li $a0, 2
+	li $s2, 1000
+
+	move $t7, $ra
 	jal funcao_DecToAny
+	move $ra, $t7
 
 	jr	$ra
 
@@ -207,6 +211,7 @@ funcao_DecToOct:
 funcao_DecToHex:
 
 	li $a0, 16
+
 	jal funcao_DecToAny
 
 	jr	$ra
@@ -218,33 +223,44 @@ funcao_DecToHex:
 #-----------------------------------------------------------------------#
 
 funcao_DecToAny:
-	li $t0, 32			# Run all 32 bits of our number width = z
-	move $t1, $s1		# Move our number to our temporary register
+	# Save our return pointer
+	addi $sp, $sp, -4
+	sw $ra, 4($sp)
+
+	li $t0, 24			# Run all 16 bits of our number width = z
+	move $t1, $s2		# Move our number to our temporary register
 	li $t5, 0			# Define our return as zero for now
+	move $t6, $a0		# Move our exponent base to a safe place
 	jal funcao_DecToAny_loop
 
 funcao_DecToAny_loop:
-	move $a0, $a0		# Define our base to be exponentiated
+	move $a0, $t6		# Define our base to be exponentiated
 	move $a1, $t0		# Move our main argument to our exponential function
 	jal exponential
-	move $t2, $t5		# Move our result to our temporary register
+	move $t2, $v0		# Move our result to our temporary register
 	sub $t3, $t1, $t2	# Get the result from y - (base ^ (z))
 
-	bge $t3, $zero, funcao_DecToAny_gotRight
+	blt $t3, $zero, funcao_DecToAny_continue
 
-	subi $t0, $t0, 1   	# Reduce our base until we got zero
+	move $t1, $t3		# Reduce our number for the next interaction
 
-	beq $t0, $zero, funcao_DecToAny_end
-
-funcao_DecToAny_gotRight:
-	li $a0, 10		# Define our base to be exponentiated
+	li $a0, 10			# Define our base to be exponentiated
 	move $a1, $t0		# Move our main argument to our exponential function
 	jal exponential
 
 	add	$t5, $t5, $v0	# Sum our base to the temporary return register
 
+funcao_DecToAny_continue:
+	subi $t0, $t0, 1   	# Reduce our base until we got zero
+
+	bne $t0, $zero, funcao_DecToAny_loop
+
 funcao_DecToAny_end:
-	move $v0, $t5
+	move $v0, $t5		# Move to our end pointer
+
+	# Restore our return pointer
+	lw	$ra, 4($sp)
+	addi $sp, $sp, 4
 
 	jr	$ra
 
@@ -324,7 +340,7 @@ exponential_loop:
 	j exponential_loop	# Jumps to the beginning of the loop to start
 						# the process over
 exponential_end:
-	#restore $t0 and the stack
+	# restore $t0 and the stack
 	lw	$t0, 4($sp)
 	addi $sp, $sp, 4
 	jr $ra

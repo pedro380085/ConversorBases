@@ -6,6 +6,7 @@
 	STR_INSIRA_BASE_FINAL: .asciiz "O numero deve ser convertido para qual base? (B)Binario (O)Octal (D)Decimal (H)Hexadecimal\n"
 	STR_ENTRADA_INVALIDA: .asciiz "\nEntrada Invalida"
 	STR_INPUT: .space 64
+	STR_OUTPUT: .space 64
 	
 .text
 	.globl main
@@ -54,12 +55,15 @@ main:
 	move	$s1, $v0			# armazena o valor de base final em s1
 	jal 	verificaBase
 	beq	$v0, $zero, encerraPrograma	# se a funcao retornou 0, a entrada foi invalida
-	
-	
+
+	# Carrega a posicao final
+	la	$s3, STR_OUTPUT
+		
 	# Verifica qual sera a conversao 
 	#	$s0 -> base inicial
 	#	$s1 -> base final
-	#	$s2 -> numero
+	#	$s2 -> string inicial
+	# 	$s3 -> string final
 	
 	move 	$a0, $s2	# define o numero como parametro da funcao de conversao
 	
@@ -112,7 +116,6 @@ baseInicialNaoEhDecimal:
 	
 	j	encerraPrograma
 	
-	
 imprimeResultado:
 	
 	
@@ -121,7 +124,7 @@ encerraPrograma:
 	li	$v0, 10
 	syscall
 	
-#------------- Defini��o de fluxo do programa -------------#
+#------------- Definicao de fluxo do programa -------------#
 # Binario
 BinToOct:
 	jal	funcao_BinToDec
@@ -477,6 +480,8 @@ exponential_end:
 #-----------------------------------------------------------------------#
 ## int strlen(char*)
 strlen:
+	addi $sp, $sp, -4
+	sw $t0, 4($sp)
     addi $t0, $zero, 1  #initialize count to start with 1 for first character
     j strlen.test
 strlen.loop:
@@ -487,10 +492,38 @@ strlen.test:
     bnez $t1, strlen.loop 	#end loop if null character is reached
     subi $t0, $t0, 2
     move $v0, $t0
+    lw	$t0, 4($sp)
+	addi $sp, $sp, 4
     jr $ra
 
 
 
+# String copier function
+strcopier:
+	addi $sp, $sp, -12
+	sw $t0, 4($sp)
+	sw $t1, 8($sp)
+	sw $t2, 12($sp)
+    or $t0, $a0, $zero # Source
+    or $t1, $a1, $zero # Destination
+
+strcopier_loop:
+    lb $t2, 0($t0)
+    beq $t2, $zero, strcopier_end
+    addiu $t0, $t0, 1
+    sb $t2, 0($t1)
+    addiu $t1, $t1, 1
+    b strcopier_loop
+    nop
+
+strcopier_end:
+    or $v0, $t1, $zero # Return last position on result buffer
+    lw	$t0, 4($sp)
+    lw	$t1, 8($sp)
+    lw	$t2, 12($sp)
+	addi $sp, $sp, 12
+    jr $ra
+    nop
 
 
 

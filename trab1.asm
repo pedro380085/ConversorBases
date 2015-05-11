@@ -106,7 +106,6 @@ baseInicialNaoEhOctal:
 	j	encerraPrograma
 	
 baseInicialNaoEhDecimal:
-	
 	li	$t0, 'B'
 	beq	$s1, $t0, HexToBin
 	li	$t0, 'O'
@@ -117,7 +116,9 @@ baseInicialNaoEhDecimal:
 	j	encerraPrograma
 	
 imprimeResultado:
-	
+	li $v0, 4
+	move $a0, $s3
+	syscall
 	
 	# Encerra programa
 encerraPrograma:
@@ -129,18 +130,21 @@ encerraPrograma:
 BinToOct:
 	li $a0, 2
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 8
 	jal	funcao_numberToString
 	j	imprimeResultado
 BinToDec:
 	li $a0, 2
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 10
 	jal	funcao_numberToString
 	j	imprimeResultado
 BinToHex:
 	li $a0, 2
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 16
 	jal	funcao_numberToString
 	j	imprimeResultado
@@ -149,38 +153,44 @@ BinToHex:
 OctToBin:
 	li $a0, 8
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 2
 	jal	funcao_numberToString
 	j	imprimeResultado
 OctToDec:
 	li $a0, 8
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 10
 	jal	funcao_numberToString
 	j	imprimeResultado
 OctToHex:
 	li $a0, 8
 	jal funcao_stringToNumber
-	#li $a0, 16
-	#jal	funcao_numberToString
+	move $s2, $v0
+	li $a0, 16
+	jal	funcao_numberToString
 	j	imprimeResultado
 
 # Decimal	
 DecToBin:
 	li $a0, 10
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 2
 	jal	funcao_numberToString
 	j	imprimeResultado
 DecToOct:
 	li $a0, 10
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 8
 	jal	funcao_numberToString
 	j	imprimeResultado
 DecToHex:
 	li $a0, 10
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 16
 	jal	funcao_numberToString
 	j	imprimeResultado
@@ -189,18 +199,21 @@ DecToHex:
 HexToBin:
 	li $a0, 16
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 2
 	jal	funcao_numberToString
 	j	imprimeResultado
 HexToOct:
 	li $a0, 16
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 8
 	jal	funcao_numberToString
 	j	imprimeResultado
 HexToDec:
 	li $a0, 16
 	jal funcao_stringToNumber
+	move $s2, $v0
 	li $a0, 10
 	jal	funcao_numberToString
 	j	imprimeResultado
@@ -219,7 +232,7 @@ funcao_numberToString:
 	addi $sp, $sp, -4
 	sw $ra, 4($sp)
 
-	li $t0, 31			# Run all 32 bits of our number width = z
+	li $t0, 24			# Run all 32 bits of our number width = z
 	move $t1, $s2		# Move our number to our temporary register
 	li $t5, 0			# Define our return as zero for now
 	move $t6, $a0		# Move our exponent base to a safe place
@@ -233,80 +246,81 @@ funcao_numberToString_innerLoop:
 	move $a0, $t6		# Define our base to be exponentiated
 	move $a1, $t0		# Move our main argument to our exponential function
 	jal exponential
+
 	move $t2, $v0		# Move our result to our temporary register
 	mul $t2, $t2, $t7 	# w = (base - alpha) * (base ^ (z))
+
+	blt $t1, $t2, funcao_numberToString_innerContinue
+
 	sub $t3, $t1, $t2	# Get the result from (y - w)
-
-	blt $t3, $zero, funcao_numberToString_innerContinue
-
 	move $t1, $t3		# Reduce our number for the next interaction
 
 	# Concatenate strings
-	move $a0, $s2		# Our origin string
+	move $a0, $s3		# Our origin string
 
 	li $a1, '0'
-	li $t0, 0
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 0
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, '1'
-	li $t0, 1
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 1
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, '2'
-	li $t0, 2
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 2
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, '3'
-	li $t0, 3
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 3
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, '4'
-	li $t0, 4
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 4
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, '5'
-	li $t0, 5
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 5
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, '6'
-	li $t0, 6
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 6
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, '7'
-	li $t0, 7
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 7
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, '8'
-	li $t0, 8
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 8
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, '9'
-	li $t0, 9
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 9
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, 'A'
-	li $t0, 10
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 10
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, 'B'
-	li $t0, 11
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 11
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, 'C'
-	li $t0, 12
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 12
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, 'D'
-	li $t0, 13
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 13
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, 'E'
-	li $t0, 14
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 14
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 	li $a1, 'F'
-	li $t0, 15
-	beq $t0, $t7, funcao_numberToString_innerLoopConcatenate
+	li $t4, 15
+	beq $t4, $t7, funcao_numberToString_innerLoopConcatenate
 
 funcao_numberToString_innerLoopConcatenate:
 	jal strcopier
@@ -324,7 +338,7 @@ funcao_numberToString_continue:
 	bne $t0, $zero, funcao_numberToString_loop
 
 funcao_numberToString_end:
-	move $s2, $t5		# Move to our end pointer
+	move $v0, $t5		# Move to our end pointer
 
 	# Restore our return pointer
 	lw	$ra, 4($sp)
@@ -437,7 +451,7 @@ funcao_stringToNumber_continue:
 	bne $t3, $zero, funcao_stringToNumber_loop
 
 funcao_stringToNumber_end:
-	move $s2, $t5		# Move to our end pointer
+	move $v0, $t5		# Move to our end pointer
 
 	# Restore our return pointer
 	lw	$ra, 4($sp)

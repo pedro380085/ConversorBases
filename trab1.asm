@@ -107,7 +107,7 @@ baseInicialNaoEhDecimal:
 	beq	$s1, $t0, HexToBin
 	li	$t0, 'O'
 	beq	$s1, $t0, HexToOct
-	li	$t0, 'H'
+	li	$t0, 'D'
 	beq	$s1, $t0, HexToDec
 	
 	j	encerraPrograma
@@ -302,7 +302,7 @@ funcao_AnyToDec:
 	move $t6, $a0
 
 	# Get string length
-	move $a0, $2
+	move $a0, $s2
 	jal strlen
 	move $t3, $v0
 
@@ -311,82 +311,85 @@ funcao_AnyToDec:
 	li $t5, 0
 
 funcao_AnyToDec_loop:
-	lb $t2, 0($t4)   				# load the next character to t2
-	bnez $t2, funcao_AnyToDec_end 	# end loop if null character is reached
+	lb $t2, 0($t4)   						# load the next character to t2
+	beq $t2, $zero, funcao_AnyToDec_end 	# end loop if null character is reached
 
 	li $t0, '0'
 	li $t1, 0
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, '1'
 	li $t1, 1
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, '2'
 	li $t1, 2
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, '3'
 	li $t1, 3
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, '4'
 	li $t1, 4
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, '5'
 	li $t1, 5
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, '6'
 	li $t1, 6
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, '7'
 	li $t1, 7
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, '8'
 	li $t1, 8
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, '9'
 	li $t1, 9
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, 'A'
 	li $t1, 10
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, 'B'
 	li $t1, 11
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, 'C'
 	li $t1, 12
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, 'D'
 	li $t1, 13
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, 'E'
 	li $t1, 14
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 	li $t0, 'F'
 	li $t1, 15
-	beq $t0, $a0, funcao_AnyToDec_continue
+	beq $t0, $t2, funcao_AnyToDec_continue
 
 funcao_AnyToDec_continue:
-	li $a0, $t6			# Define our base to be exponentiated
+	move $a0, $t6		# Define our base to be exponentiated
 	move $a1, $t3		# Move our main argument to our exponential function
+	subi $a1, $a1, 1 	# Bases exponenciais comecam a contar em 0
 	jal exponential
 
 	mul $t1, $t1, $v0 	# Multiplica as bases
 	subi $t3, $t3, 1 	# Decrementa o tamanho da string
 	add $t5, $t5, $t1 	# Soma o resultado a base
 	addi $t4, $t4, 1 	# Aumenta a posicao do nosso registrador de caracter
+
+	bne $t3, $zero, funcao_AnyToDec_loop
 
 funcao_AnyToDec_end:
 	move $v0, $t5		# Move to our end pointer
@@ -461,7 +464,7 @@ exponential_end:
 	
 #-----------------------------------------------------------------------#
 #	Realiza o calculo do tamanho da string								#
-#	Entrada $a0 = base; $a1 = expoente 									#
+#	Entrada $a0 = endereco da string 									#
 #	Retorna $v0 = tamanho da string 									#
 #-----------------------------------------------------------------------#
 ## int strlen(char*)
@@ -472,8 +475,9 @@ strlen.loop:
     addi $a0, $a0, 1    #load increment string pointer
     addi $t0, $t0, 1 	#increment count
 strlen.test:
-    lb $t1, 0($a0)   	#load the next character to t0
-    bnez $t1, strlen.loop #end loop if null character is reached
+    lb $t1, 0($a0)   		#load the next character to t0
+    bnez $t1, strlen.loop 	#end loop if null character is reached
+    subi $t0, $t0, 2
     move $v0, $t0
     jr $ra
 

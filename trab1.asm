@@ -44,7 +44,7 @@ main:
 	# Le numero digitado pelo usuario como string
 	li $v0, 8 			# take in input
 	la $a0, STR_INPUT 	# load byte space into address
-	li $a1, 20 			# allot the byte space for string
+	li $a1, 64 			# allot the byte space for string
 	move $s2, $a0 		# armazena a string em s2
 	syscall
 	
@@ -265,6 +265,7 @@ funcao_numberToString_innerLoop:
 	mul $t2, $t2, $t7 	# w = (base - alpha) * (base ^ (z))
 
 	blt $t1, $t2, funcao_numberToString_innerContinue
+	blt $t2, $zero, funcao_numberToString_innerContinue
 
 	sub $t3, $t1, $t2	# Get the result from (y - w)
 	move $t1, $t3		# Reduce our number for the next interaction
@@ -347,7 +348,7 @@ funcao_numberToString_innerLoopConcatenate:
 funcao_numberToString_innerContinue:
 	subi $t7, $t7, 1 	# Reduce (base - alpha) until we get to zero
 
-	bgt $t7, $zero, funcao_numberToString_innerLoop
+	bge $t7, $zero, funcao_numberToString_innerLoop
 
 funcao_numberToString_continue:
 	subi $t0, $t0, 1   	# Reduce our base until we got zero
@@ -385,7 +386,7 @@ funcao_stringToNumber:
 	li $t5, 0
 
 funcao_stringToNumber_loop:
-	lb $t2, 0($t4)   						# load the next character to t2
+	lb $t2, 0($t4)   							# load the next character to t2
 	beq $t2, $zero, funcao_stringToNumber_end 	# end loop if null character is reached
 
 	li $t0, '0'
